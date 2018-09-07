@@ -68,7 +68,7 @@ client.on('guildBanRemove', (guild, user) => {
   ));
 });
 
-client.login('NDg3NTg2NTExNzc3MzAwNDgw.DnP1jA.4yGi9FIoIaLrj5pv6d6RLp0cRGc');
+client.login(DISNEY);
 
 // list all the parks supported by the library
 for (var park in Themeparks.Parks)
