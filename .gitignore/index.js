@@ -8,7 +8,7 @@ const client = new Client({ disableEveryone: true });
 
 client.on('ready', () => {
 	console.log('Bot en ligne!');
-  client.user.setActivity('ðŸ° !temps')});
+  client.user.setActivity('🏰 !temps')});
 client.on('warn', console.warn);
 client.on('error', console.error);
 client.on('message', message => {
