@@ -16,6 +16,8 @@ client.on('error', console.error);
 
 // Messages d'informations
 client.on('guildMemberAdd', member => {
+  var role = member.guild.roles.find("name", "Guest");
+  member.addRole(role)
   var channel = client.channels.get('487657315579854848');
   if (!channel) return;
   channel.send(ce(
