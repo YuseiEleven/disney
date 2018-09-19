@@ -84,7 +84,7 @@ client.on('message', message => {
     channel.send(`${chateau}`);
   }});
 client.on('message', message => {
-  if (message.content === prefix + 'temps') {
+  if (message.content === prefix + 'disneyland') {
     var channel = client.channels.get('487596220479438848');
     if (!channel) return;
     const chateau = client.emojis.find("name", "chateau")
@@ -106,6 +106,30 @@ client.on('message', message => {
     ))}});
 }});
 
+var disneyWaltDisneyStudios = new Themeparks.Parks.DisneylandParisWaltDisneyStudios();
+
+client.on('message', message => {
+  if (message.content === prefix + 'studios') {
+    var channel = client.channels.get('487596220479438848');
+    if (!channel) return;
+    const wd = client.emojis.find("name", "wd")
+    channel.send(ce(
+      "#010101", {"name": "", "icon_url": ""}, "", "",
+      [{"name": `${wd} Walt Disney Studios`, "value": "Temps d'attentes"}],
+      {"text": "", "icon_url": ""}, 
+      {"thumbnail": "", "image": ""}, false
+    ));
+    disneyWaltDisneyStudios.GetWaitTimes().then(function(rides) {
+    for(var i=0, ride; ride=rides[i++];) {
+    var channel = client.channels.get('487596220479438848');
+    if (!channel) return;
+    channel.send(ce(
+    "#010101", {"name": "", "icon_url": ""}, "", "",
+    [{"name": ride.name, "value": ride.waitTime + " minutes."}],
+    {"text": "", "icon_url": ""}, 
+    {"thumbnail": "", "image": ""}, true
+    ))}});
+}});
 
 // Utilitaire
 client.on('message', async message => {
