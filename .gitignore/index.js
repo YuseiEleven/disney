@@ -5,7 +5,6 @@ var prefix = "!";
 const { Client, Util } = require('discord.js');
 const PREFIX = "!";
 const client = new Client({ disableEveryone: true });
-var opus = require('opusscript')
 client.login(process.env.DISNEY);
 
 // Lancement
