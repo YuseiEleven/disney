@@ -384,7 +384,7 @@ ${serverQueue.songs.map(song => `**-** ${song.title}`).join('\n')}
 		}
 		return channel.send('❌ Aucune musique en cours de lecture.');
 	} else if (command === 'reprise') {
-    if (!message.member.hasPermission("MUTE_MEMBERS")) return;
+    if (!msg.member.hasPermission("MUTE_MEMBERS")) return;
 		if (serverQueue && !serverQueue.playing) {
 			serverQueue.playing = true;
 			serverQueue.connection.dispatcher.resume();
