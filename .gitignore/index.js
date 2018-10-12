@@ -327,7 +327,7 @@ Veuillez écrire une valeur allant de 1 à 10 pour sélectionner l'un des résul
 					`);
 					// eslint-disable-next-line max-depth
 					try {
-						var response = await channel.awaitMessages(msg2 => msg2.content > 0 && msg2.content < 11, {
+						var response = await msg.channel.awaitMessages(msg2 => msg2.content > 0 && msg2.content < 11, {
 							maxMatches: 1,
 							time: 10000,
 							errors: ['time']
