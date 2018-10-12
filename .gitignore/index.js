@@ -17,9 +17,14 @@ client.login('process.env.DISNEY');
 client.on('ready', () => {
 	console.log('Bot en ligne!');
   client.user.setActivity('🏰 !aide')});
-  var voiceChannel = ('499964668719136779');
-  voiceChannel.join()
-  client.on('warn', console.warn);
+  const channel = client.channels.get("499964668719136779");
+  if (!channel) return console.error("The channel does not exist!");
+  channel.join().then(connection => {
+    console.log("Successfully connected.");
+  }).catch(e => {
+    console.error(e);
+  });
+client.on('warn', console.warn);
 client.on('error', console.error);
 
 // Messages d'informations
