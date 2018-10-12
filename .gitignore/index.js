@@ -346,18 +346,18 @@ Veuillez écrire une valeur allant de 1 à 10 pour sélectionner l'un des résul
 			return handleVideo(video, msg, voiceChannel);
 		}
 	} else if (command === 'suivant') {
-    if (!message.member.hasPermission("MUTE_MEMBERS")) return;
+    if (!msg.member.hasPermission("MUTE_MEMBERS")) return;
     if (!serverQueue) return channel.send("❌ Aucune musique suivante dans la file d'attente.");
 		serverQueue.connection.dispatcher.end('Skip command has been used!');
 		return undefined;
 	} else if (command === 'stop') {
-    if (!message.member.hasPermission("MUTE_MEMBERS")) return;
+    if (!msg.member.hasPermission("MUTE_MEMBERS")) return;
 		if (!serverQueue) return channel.send('❌ Aucune musique à stopper.');
 		serverQueue.songs = [];
 		serverQueue.connection.dispatcher.end('Stop command has been used!');
 		return undefined;
 	} else if (command === 'volume') {
-    if (!message.member.hasPermission("MUTE_MEMBERS")) return;
+    if (!msg.member.hasPermission("MUTE_MEMBERS")) return;
 		if (!serverQueue) return channel.send('❌ Aucune musique en cours de lecture.');
 		if (!args[1]) return channel.send(`Volume actuel: **${serverQueue.volume}**`);
 		serverQueue.volume = args[1];
@@ -365,7 +365,7 @@ Veuillez écrire une valeur allant de 1 à 10 pour sélectionner l'un des résul
 		return channel.send(`Volume réglé à: **${args[1]}**`);
 	} else if (command === 'info') {
 		if (!serverQueue) return channel.send('❌ Aucune musique en cours de lecture.');
-		return channel.send(`🎶 Lecture en cours: **${serverQueue.songs[0].title}**`);
+		return channel.send(`🎶 Titre de la lecture en cours: **${serverQueue.songs[0].title}**`);
 	} else if (command === 'file') {
 		if (!serverQueue) return channel.send('❌ Aucune musique en cours de lecture.');
 		return channel.send(`
@@ -376,7 +376,7 @@ ${serverQueue.songs.map(song => `**-** ${song.title}`).join('\n')}
 🎶 **Lecture en cours:** ${serverQueue.songs[0].title}
 		`);
 	} else if (command === 'pause') {
-    if (!message.member.hasPermission("MUTE_MEMBERS")) return;
+    if (!msg.member.hasPermission("MUTE_MEMBERS")) return;
 		if (serverQueue && serverQueue.playing) {
 			serverQueue.playing = false;
 			serverQueue.connection.dispatcher.pause();
@@ -454,5 +454,5 @@ function play(guild, song) {
 		.on('error', error => console.error(error));
 	dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
 
-	serverQueue.textChannel.send(`🎶 Lecture en cours: **${song.title}**`);
+	serverQueue.textChannel.send(`🎶 Démarrage de la lecture: **${song.title}**`);
 }
