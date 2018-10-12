@@ -239,6 +239,9 @@ client.on('message', message => {
       "#010101", {"name": `Aide`, "icon_url": ""}, "", "",
       [{"name": "!disneyland", "value": "Afficher les temps d'attentes du parc Disneyland Paris."},
       {"name": "!studios", "value": "Afficher les temps d'attentes du parc Walt Disney Studios."},
+      {"name": "!play <youtube-url>", "value": "Ajouter une musique à la file d'attente."},
+      {"name": "!file", "value": "Afficher la liste des musiques en file d'attente."},
+      {"name": "!info", "value": "Afficher le titre de la musique en cours de lecture."},
       {"name": "!castmember", "value": "Afficher les commandes de modération."}],
       {"text": "", "icon_url": ""}, 
       {"thumbnail": "", "image": ""}, true
@@ -256,7 +259,12 @@ client.on('message', message => {
       {"name": "!ban <@guest#1234> <raison>", "value": "Bannir un guest du serveur discord."},
       {"name": "!mute <@guest#1234> <raison>", "value": "Rendre muet un guest."},
       {"name": "!unmute <@guest#1234>", "value": "Redonner la parole à un guest."},
-      {"name": "!sondage;<Question>;<Choix1>;<Choix2>;<Choix3>", "value": "Lancer un sondage."}],
+      {"name": "!sondage;<Question>;<Choix1>;<Choix2>;<Choix3>", "value": "Lancer un sondage."},
+      {"name": "!volume <1-5>", "value": "Régler le volume."},
+      {"name": "!suivant", "value": "Passer à la musique suivante dans la file d'attente."},
+      {"name": "!pause", "value": "Mettre en pausse la musique en cours."},
+      {"name": "!reprise", "value": "Reprendre la lecture de la musique."},
+      {"name": "!stop", "value": "Stopper la lecture de musique."}],
       {"text": "", "icon_url": ""}, 
       {"thumbnail": "", "image": ""}, true
     ))
@@ -337,7 +345,7 @@ Veuillez écrire une valeur allant de 1 à 10 pour sélectionner l'un des résul
 			}
 			return handleVideo(video, msg, voiceChannel);
 		}
-	} else if (command === 'skip') {
+	} else if (command === 'suivant') {
     if (!message.member.hasPermission("MUTE_MEMBERS")) return;
     if (!serverQueue) return channel.send("❌ Aucune musique suivante dans la file d'attente.");
 		serverQueue.connection.dispatcher.end('Skip command has been used!');
@@ -358,7 +366,7 @@ Veuillez écrire une valeur allant de 1 à 10 pour sélectionner l'un des résul
 	} else if (command === 'info') {
 		if (!serverQueue) return channel.send('❌ Aucune musique en cours de lecture.');
 		return channel.send(`🎶 Lecture en cours: **${serverQueue.songs[0].title}**`);
-	} else if (command === 'queue') {
+	} else if (command === 'file') {
 		if (!serverQueue) return channel.send('❌ Aucune musique en cours de lecture.');
 		return channel.send(`
 __**File d'attente:**__
@@ -368,13 +376,15 @@ ${serverQueue.songs.map(song => `**-** ${song.title}`).join('\n')}
 🎶 **Lecture en cours:** ${serverQueue.songs[0].title}
 		`);
 	} else if (command === 'pause') {
+    if (!message.member.hasPermission("MUTE_MEMBERS")) return;
 		if (serverQueue && serverQueue.playing) {
 			serverQueue.playing = false;
 			serverQueue.connection.dispatcher.pause();
 			return channel.send('⏸ Musique en pause');
 		}
 		return channel.send('❌ Aucune musique en cours de lecture.');
-	} else if (command === 'resume') {
+	} else if (command === 'reprise') {
+    if (!message.member.hasPermission("MUTE_MEMBERS")) return;
 		if (serverQueue && !serverQueue.playing) {
 			serverQueue.playing = true;
 			serverQueue.connection.dispatcher.resume();
