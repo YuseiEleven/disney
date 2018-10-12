@@ -1,17 +1,25 @@
-var Themeparks = require("themeparks");
 const Discord = require('discord.js');
-const ce = require("embed-creator");
-var prefix = "!";
 const { Client, Util } = require('discord.js');
+const ce = require("embed-creator");
+var Themeparks = require("themeparks");
+var opus = require('opusscript')
+const YouTube = require('simple-youtube-api');
+const ytdl = require('ytdl-core');
+var prefix = "!";
 const PREFIX = "!";
 const client = new Client({ disableEveryone: true });
-client.login(process.env.DISNEY);
+const youtube = new YouTube(GOOGLE_API_KEY);
+const queue = new Map();
+const GOOGLE_API_KEY = ('process.env.APIKEY');
+client.login('process.env.DISNEY');
 
 // Lancement
 client.on('ready', () => {
 	console.log('Bot en ligne!');
   client.user.setActivity('🏰 !aide')});
-client.on('warn', console.warn);
+  var voiceChannel = ('499964668719136779');
+  voiceChannel.join()
+  client.on('warn', console.warn);
 client.on('error', console.error);
 
 // Messages d'informations
@@ -221,7 +229,8 @@ client.on("message", msg => {
 //Utilitaire
 client.on('message', message => {
   if (message.content === prefix + 'aide') {
-    message.channel.send(ce(
+    var channel = client.channels.get('487596220479438848');
+    channel.send(ce(
       "#010101", {"name": `Aide`, "icon_url": ""}, "", "",
       [{"name": "!disneyland", "value": "Afficher les temps d'attentes du parc Disneyland Paris."},
       {"name": "!studios", "value": "Afficher les temps d'attentes du parc Walt Disney Studios."},
@@ -234,7 +243,8 @@ client.on('message', message => {
 client.on('message', message => {
   if (message.content === prefix + 'castmember') {
     if (!message.member.hasPermission("MUTE_MEMBERS")) return;
-    message.channel.send(ce(
+    var channel = client.channels.get('487596220479438848');
+    channel.send(ce(
       "#010101", {"name": `Aide CastMember`, "icon_url": ""}, "", "",
       [{"name": "!purge <2-100>", "value": "Supprimer des messages dans un salon textuel."},
       {"name": "!kick <@guest#1234> <raison>", "value": "Expulser un guest du serveur discord."},
@@ -264,3 +274,170 @@ client.on('message', message => {
   .then(function (message) {
     message.react('1⃣').then(() => message.react('2⃣')).then(() => message.react('3⃣'));
     })}});
+
+
+//Musique
+client.on('message', async msg => { 
+	if (msg.author.bot) return undefined;
+	if (!msg.content.startsWith(PREFIX)) return undefined;
+
+	const args = msg.content.split(' ');
+	const searchString = args.slice(1).join(' ');
+	const url = args[1] ? args[1].replace(/<(.+)>/g, '$1') : '';
+  const serverQueue = queue.get(msg.guild.id);
+  var channel = client.channels.get('500237741032996865');
+
+	let command = msg.content.toLowerCase().split(' ')[0];
+	command = command.slice(PREFIX.length)
+
+	if (command === 'play') {
+		if (url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/playlist(.*)$/)) {
+			const playlist = await youtube.getPlaylist(url);
+			const videos = await playlist.getVideos();
+			for (const video of Object.values(videos)) {
+				const video2 = await youtube.getVideoByID(video.id); // eslint-disable-line no-await-in-loop
+				await handleVideo(video2, msg, voiceChannel, true); // eslint-disable-line no-await-in-loop
+			}
+			return channel.send(`✅ Playlist: **${playlist.title}** ajouté à la file d'attente!`);
+		} else {
+			try {
+				var video = await youtube.getVideo(url);
+			} catch (error) {
+				try {
+					var videos = await youtube.searchVideos(searchString, 10);
+					let index = 0;
+					channel.send(`
+
+${videos.map(video2 => `**${++index} -** ${video2.title}`).join('\n')}
+
+Veuillez écrire une valeur allant de 1 à 10 pour sélectionner l'un des résultats de la recherche.
+					`);
+					// eslint-disable-next-line max-depth
+					try {
+						var response = await channel.awaitMessages(msg2 => msg2.content > 0 && msg2.content < 11, {
+							maxMatches: 1,
+							time: 10000,
+							errors: ['time']
+						});
+					} catch (err) {
+						console.error(err);
+						return channel.send('❌ Aucune valeur ou valeur invalide entrée, annulant la sélection de vidéo.');
+					}
+					const videoIndex = parseInt(response.first().content);
+					var video = await youtube.getVideoByID(videos[videoIndex - 1].id);
+				} catch (err) {
+					console.error(err);
+					return channel.send('❌ Aucun résultat de recherche obtenu.');
+				}
+			}
+			return handleVideo(video, msg, voiceChannel);
+		}
+	} else if (command === 'skip') {
+    if (!message.member.hasPermission("MUTE_MEMBERS")) return;
+    if (!serverQueue) return channel.send("❌ Aucune musique suivante dans la file d'attente.");
+		serverQueue.connection.dispatcher.end('Skip command has been used!');
+		return undefined;
+	} else if (command === 'stop') {
+    if (!message.member.hasPermission("MUTE_MEMBERS")) return;
+		if (!serverQueue) return channel.send('❌ Aucune musique à stopper.');
+		serverQueue.songs = [];
+		serverQueue.connection.dispatcher.end('Stop command has been used!');
+		return undefined;
+	} else if (command === 'volume') {
+    if (!message.member.hasPermission("MUTE_MEMBERS")) return;
+		if (!serverQueue) return channel.send('❌ Aucune musique en cours de lecture.');
+		if (!args[1]) return channel.send(`Volume actuel: **${serverQueue.volume}**`);
+		serverQueue.volume = args[1];
+		serverQueue.connection.dispatcher.setVolumeLogarithmic(args[1] / 5);
+		return channel.send(`Volume réglé à: **${args[1]}**`);
+	} else if (command === 'info') {
+		if (!serverQueue) return channel.send('❌ Aucune musique en cours de lecture.');
+		return channel.send(`🎶 Lecture en cours: **${serverQueue.songs[0].title}**`);
+	} else if (command === 'queue') {
+		if (!serverQueue) return channel.send('❌ Aucune musique en cours de lecture.');
+		return channel.send(`
+__**File d'attente:**__
+
+${serverQueue.songs.map(song => `**-** ${song.title}`).join('\n')}
+
+🎶 **Lecture en cours:** ${serverQueue.songs[0].title}
+		`);
+	} else if (command === 'pause') {
+		if (serverQueue && serverQueue.playing) {
+			serverQueue.playing = false;
+			serverQueue.connection.dispatcher.pause();
+			return channel.send('⏸ Musique en pause');
+		}
+		return channel.send('❌ Aucune musique en cours de lecture.');
+	} else if (command === 'resume') {
+		if (serverQueue && !serverQueue.playing) {
+			serverQueue.playing = true;
+			serverQueue.connection.dispatcher.resume();
+			return channel.send('▶ Reprise de la lecture.');
+		}
+		return channel.send('❌ Aucune musique en cours de lecture.');
+	}
+
+	return undefined;
+});
+
+async function handleVideo(video, msg, voiceChannel, playlist = false) {
+	const serverQueue = queue.get(msg.guild.id);
+	console.log(video);
+	const song = {
+		id: video.id,
+		title: Util.escapeMarkdown(video.title),
+		url: `https://www.youtube.com/watch?v=${video.id}`
+	};
+	if (!serverQueue) {
+		const queueConstruct = {
+			textChannel: msg.channel,
+			voiceChannel: voiceChannel,
+			connection: null,
+			songs: [],
+			volume: 5,
+			playing: true
+		};
+		queue.set(msg.guild.id, queueConstruct);
+
+		queueConstruct.songs.push(song);
+
+		try {
+			var connection = await voiceChannel.join();
+			queueConstruct.connection = connection;
+			play(msg.guild, queueConstruct.songs[0]);
+		} catch (error) {
+			console.error(`Erreur lors de la connexion au salon vocal: ${error}`);
+			queue.delete(msg.guild.id);
+			return channel.send(`Erreur lors de la connexion au salon vocal: ${error}`);
+		}
+	} else {
+		serverQueue.songs.push(song);
+		console.log(serverQueue.songs);
+		if (playlist) return undefined;
+		else return channel.send(`✅ **${song.title}** a été ajouté à la file d'attente`);
+	}
+	return undefined;
+}
+
+function play(guild, song) {
+	const serverQueue = queue.get(guild.id);
+
+	if (!song) {
+		queue.delete(guild.id);
+		return;
+	}
+	console.log(serverQueue.songs);
+
+	const dispatcher = serverQueue.connection.playStream(ytdl(song.url))
+		.on('end', reason => {
+			if (reason === 'Stream is not generating quickly enough.') console.log('Song ended.');
+			else console.log(reason);
+			serverQueue.songs.shift();
+			play(guild, serverQueue.songs[0]);
+		})
+		.on('error', error => console.error(error));
+	dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+
+	serverQueue.textChannel.send(`🎶 Lecture en cours: **${song.title}**`);
+}
