@@ -8,10 +8,10 @@ const ytdl = require('ytdl-core');
 var prefix = "!";
 const PREFIX = "!";
 const client = new Client({ disableEveryone: true });
-const GOOGLE_API_KEY = ('process.env.APIKEY');
+const GOOGLE_API_KEY = (process.env.APIKEY);
 const youtube = new YouTube(GOOGLE_API_KEY);
 const queue = new Map();
-client.login('process.env.DISNEY');
+client.login(process.env.DISNEY);
 
 // Lancement
 client.on('ready', () => {
