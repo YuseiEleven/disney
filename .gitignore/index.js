@@ -20,9 +20,9 @@ client.on('ready', () => {
 client.on('warn', console.warn);
 client.on('error', console.error);
 client.on('ready', () => { 
-  const channel = client.channels.get("499964668719136779");
-  if (!channel) return console.error("The channel does not exist!");
-    channel.join().then(connection => {
+  const voiceChannel = client.channels.get("499964668719136779");
+  if (!voiceChannel) return console.error("The channel does not exist!");
+    voiceChannel.join().then(connection => {
     console.log("Successfully connected.");
 }).catch(e => {
   console.error(e);
@@ -299,7 +299,7 @@ client.on('message', async msg => {
 	const url = args[1] ? args[1].replace(/<(.+)>/g, '$1') : '';
   const serverQueue = queue.get(msg.guild.id);
   var channel = client.channels.get('500237741032996865');
-
+  const voiceChannel = client.channels.get("499964668719136779");
 	let command = msg.content.toLowerCase().split(' ')[0];
 	command = command.slice(PREFIX.length)
 
