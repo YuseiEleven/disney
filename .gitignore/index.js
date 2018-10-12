@@ -17,16 +17,16 @@ client.login('process.env.DISNEY');
 client.on('ready', () => {
 	console.log('Bot en ligne!');
   client.user.setActivity('🏰 !aide')});
-  const channel = client.channels.get("499964668719136779");
-  if (!channel) return console.error("The channel does not exist!");
-  channel.join().then(connection => {
-    console.log("Successfully connected.");
-  }).catch(e => {
-    console.error(e);
-  });
 client.on('warn', console.warn);
 client.on('error', console.error);
-
+client.on('ready', () => { 
+  const channel = client.channels.get("499964668719136779");
+  if (!channel) return console.error("The channel does not exist!");
+    channel.join().then(connection => {
+    console.log("Successfully connected.");
+}).catch(e => {
+  console.error(e);
+})});
 // Messages d'informations
 client.on('guildMemberAdd', member => {
   var role = member.guild.roles.find("name", "Guest");
